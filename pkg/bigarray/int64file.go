@@ -10,6 +10,7 @@ type Int64BigArraySimple struct {
 	serializer Serializer[int64]
 	store      [][]byte
 	len        int
+	len2       int
 }
 
 func (ba *Int64BigArraySimple) SetSerializer(s Serializer[int64]) error {
