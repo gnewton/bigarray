@@ -5,11 +5,12 @@ import (
 	"github.com/gnewton/bigarray/pkg/bigarray"
 )
 
+// Simple, array-backed store, primarily for testing/validation
+
 type Int64BigArrayMem struct {
 	serializer bigarray.Serializer[int64]
 	store      [][]byte
 	len        int
-	len2       int
 }
 
 func (ba *Int64BigArrayMem) SetSerializer(s bigarray.Serializer[int64]) error {

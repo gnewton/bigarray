@@ -1,0 +1,296 @@
+package bigarray
+
+import (
+	"bufio"
+	"encoding/binary"
+	"fmt"
+	"math/rand"
+	"reflect"
+	//"io"
+	//"golang.org/x/exp/mmap"
+	//"github.com/go-mmap/mmap"
+	"log"
+	"os"
+)
+
+type WriteMode int
+
+const (
+	AppendWrite = iota
+	RandomWrite
+)
+
+//type Mappable[T any] interface {
+type Mappable[T any] interface {
+	//Serialize() []byte
+	any
+	Deserialize([]byte) T
+	//Size() int
+}
+
+type Tmp[T any] struct {
+}
+
+func (t *Tmp[any]) Deserialize(buf []byte) string {
+	return ""
+}
+
+func mappableInt64[T any]() Mappable[string] {
+	return new(Tmp[T])
+}
+
+type Numb interface {
+	int | int32 | int64 | uint32 | uint64
+}
+
+type deserializeDef func([]byte) any
+type serializeDef func(any) []byte
+
+type BigArray2[V Numb] interface {
+	Put(index int64, v uint64) error
+	//PutI(index int32, v uint64)
+	Get(index int64) (uint64, error)
+	//GetI(index int32) uint64
+	AppendFreeze() error
+}
+
+// https://go.dev/play/p/izNpAu2Dk23
+
+// Write mono, Read mono, unknown size
+// Write mono, Read random, unknown size (Present implementation)
+// Write random, Read random, known size
+// Write random, Read mono, known size
+
+type UintArray[V Numb] struct {
+	serializeFunc   serializeDef
+	deserializeFunc deserializeDef
+	index           int64
+	file            *os.File
+	filename        string
+	writer          *bufio.Writer
+	frozen          bool
+	mmap            *mmap.File
+	//mmap io.ReaderAt
+}
+
+func (a *UintArray[uint64]) Value() uint64 {
+	return uint64(2)
+}
+
+//func bar[V int64 | int32](v V) {
+func bar[V int | int32 | int64 | uint32 | uint64](v V) {
+	log.Println("bar", reflect.TypeOf(v).Size())
+}
+
+func foo() {
+	log.Println("\nFoo-----------------------")
+	var err error
+	var aw *UintArray[uint64]
+	_ = mappableInt64[string]()
+	_ = new(Mappable[string])
+
+	aw, err = NewArrayUintAppendWrite[uint64]() // append only; once you read, writes can only be in existing range; first read closes then opens for mmap
+	if err != nil {
+		log.Fatal(err)
+	}
+	//rw, err := NewArrayUintRandomWrite(size) // creates file of size, mmaps
+
+	var i, nitems int64
+	nitems = 10000000000
+	report := nitems / 100
+	log.Println("Start writing", nitems)
+	//// WRITING
+	for i = 0; i < nitems; i++ {
+		err = aw.Put(i, uint64(i+1))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if i%report == 0 {
+			log.Println("  Writing:", i, float64(i)/float64(nitems))
+		}
+	}
+
+	aw.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("End writing", nitems)
+
+	log.Println("Start monotonic reading", nitems)
+	//// READING
+	for i = 0; i < nitems; i++ {
+		_, err := aw.Get(i)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if i%report == 0 {
+			log.Println("  Reading:", i, float64(i)/float64(nitems))
+		}
+		//log.Printf("value at %d = %d\n", i, v)
+	}
+	log.Println("End monotonic reading", nitems)
+
+	log.Println("Start random reading", nitems)
+	//// READING
+	for i = 0; i < nitems; i++ {
+
+		_, err := aw.Get(rand.Int63n(nitems))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if i%report == 0 {
+			log.Println("  Reading:", i, float64(i)/float64(nitems))
+		}
+		//log.Printf("value at %d = %d\n", i, v)
+	}
+	log.Println("End random reading", nitems)
+
+	// UPDATING
+	v, err := aw.Get(1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(1, v)
+
+	err = aw.Put(1, uint64(42))
+	if err != nil {
+		log.Fatal(err)
+	}
+	v, err = aw.Get(1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(1, v)
+
+	//err = aw.Sync()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	v, err = aw.Get(1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(1, v)
+
+	err = aw.CloseAndDelete()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func NewArrayUintAppendWriteSized[V Numb](int64) (*UintArray[V], error) {
+	return nil, nil
+}
+
+func NewArrayUintAppendWrite[V Numb]() (*UintArray[V], error) {
+	a := new(UintArray[V])
+	var err error
+
+	a.file, err = os.CreateTemp(".", "big_")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileInfo, err := a.file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	a.filename = fileInfo.Name()
+	log.Println("Opened: ", a.filename)
+
+	a.writer = bufio.NewWriter(a.file)
+
+	return a, nil
+}
+
+func (a *UintArray[V]) Close() error {
+	a.writer.Flush()
+
+	fileInfo, err := a.file.Stat()
+	if err != nil {
+		return err
+	}
+	log.Println("Filesize", fileInfo.Size()/1024/1024, "MB")
+	return a.file.Close()
+}
+
+func (a *UintArray[V]) CloseAndDelete() error {
+	var err error
+	err = a.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = os.Remove(a.filename)
+	return err
+}
+
+func Put[T Numb](index int64, v T) error {
+	return nil
+}
+
+// You can put, until you do your first get
+func (a *UintArray[V]) Put(index int64, v uint64) error {
+	if a.frozen { // not thread safe
+		log.Println("Put: Writing after frozen: using mmap", index, v)
+		// OK index < size
+		//
+		//return fmt.Errorf("Puts not allowed; array is frozen")
+		vbytes := encodeUint(v)
+		n, err := a.mmap.WriteAt(vbytes, index*8)
+		if err != nil {
+			return err
+		}
+		if n != 8 {
+			return fmt.Errorf("Not enough bytes returned; wanted 8; got %d;  index=%d", n, index)
+		}
+		log.Println("Wrote bytes:", n)
+		return nil
+	} else {
+		if index != a.index {
+			return fmt.Errorf("Put index %d does not match array index %d; writing must use monotonically increasing index", index, a.index)
+		}
+		a.index++
+		return writeUint64AsBytes(a.writer, v)
+	}
+}
+
+func (a *UintArray[V]) Flush() {
+	a.writer.Flush()
+}
+
+func (a *UintArray[V]) Sync() error {
+	return a.mmap.Sync()
+}
+
+//func (a *UintArray[V]) Get(index int64) (uint64, error) {
+func (a *UintArray[V]) Get(index int64) (uint64, error) {
+	// need to check index*8 against size
+	//log.Println("Get", index)
+	var err error
+	if !a.frozen { // not thread safe
+		a.frozen = true
+
+		a.mmap, err = mmap.OpenFile(a.filename, mmap.Read|mmap.Write)
+		log.Println("Opened", a.filename)
+		if err != nil {
+			return 0, nil
+		}
+	}
+
+	//log.Println("Getting from mmap")
+	buf := make([]byte, 8)
+	n, err := a.mmap.ReadAt(buf, index*8)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+
+	if n != 8 {
+		return 0, fmt.Errorf("Not enough bytes returned; wanted 8; got %d;  index=%d", n, index)
+	}
+
+	return binary.LittleEndian.Uint64(buf), nil
+
+}
