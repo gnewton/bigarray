@@ -40,11 +40,11 @@ func decodeInt64ToBytes(buf []byte) (int64, error) {
 	return int64(ui64), err
 }
 
-func writeInt64AsBytes(w io.Writer, v int64) error {
+func WriteInt64AsBytes(w io.Writer, v int64) error {
 	return writeUint64AsBytes(w, uint64(v))
 }
 
-func readBytesAsInt64(r io.Reader) (int64, error) {
+func ReadBytesAsInt64(r io.Reader) (int64, error) {
 	ui64, err := readBytesAsUint64(r)
 
 	return int64(ui64), err

@@ -46,6 +46,10 @@ func (ba *Int64BigArrayMem) Get(index int64) (int64, error) {
 	return ba.serializer.Deserialize(buf)
 }
 
+func (ba *Int64BigArrayMem) Done() error {
+	return nil
+}
+
 func newInt64BigArrayMem(size int) bigarray.BigArray[int64] {
 	ba := new(Int64BigArrayMem)
 	ba.store = make([][]byte, size)

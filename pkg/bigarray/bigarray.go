@@ -5,6 +5,7 @@ type BigArray[T any] interface {
 	GetSerializer() Serializer[T]
 	Put(index int64, val T) error
 	Get(index int64) (T, error)
+	Done() error
 }
 
 type Serializer[T any] interface {
