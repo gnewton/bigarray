@@ -1,7 +1,6 @@
 package util
 
 import (
-	//"encoding/binary"
 	"fmt"
 	"io"
 )
@@ -20,10 +19,10 @@ func (m *Int64Serializer) Serialize(i int64) []byte {
 func (m *Int64Serializer) Deserialize(buf []byte) (int64, error) {
 	l := len(buf)
 	if l == 0 {
-		return 0, fmt.Errorf("Buff cannot be zero")
+		return 0, fmt.Errorf("Buf cannot be zero")
 	}
 	if l != m.SizeOf() {
-		return 0, fmt.Errorf("Buff wrong size: want %d; have %d", l, m.SizeOf())
+		return 0, fmt.Errorf("Buf wrong size: want %d; have %d", l, m.SizeOf())
 	}
 	return decodeInt64ToBytes(buf)
 }
@@ -38,5 +37,15 @@ func encodeInt64ToBytes(x int64) []byte {
 
 func decodeInt64ToBytes(buf []byte) (int64, error) {
 	ui64, err := decodeUint64ToBytes(buf)
+	return int64(ui64), err
+}
+
+func writeInt64AsBytes(w io.Writer, v int64) error {
+	return writeUint64AsBytes(w, uint64(v))
+}
+
+func readBytesAsInt64(r io.Reader) (int64, error) {
+	ui64, err := readBytesAsUint64(r)
+
 	return int64(ui64), err
 }
