@@ -21,6 +21,7 @@ const (
 // Local WriterAt, ReaderAt as here we cannot support all of io.WriterAt/ReaderAt guarantees
 type WriterAt interface {
 	WriteAt(p []byte, off int64) (n int, err error)
+	Done() error
 }
 
 type ReaderAt interface {
@@ -47,7 +48,7 @@ type ReaderAt interface {
          Reader: linear, mmap, kv, MC
 
    Idea: mmap chunker (MC); array of mmaps, each a certain size (10,000 x SizeOf)
-         Get(i int64): which mmap: a[i/(10000*sizeOf)]; where in this mmap? i%(10000*sizeOf)
+         Get([]buf, i int64): which mmap: a[i/(10000*sizeOf)]; where in this mmap? i%(10000*sizeOf)
          (for unknown array size)
 */
 
