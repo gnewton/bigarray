@@ -1,5 +1,9 @@
 package alt
 
+import (
+	"fmt"
+)
+
 type Mode int8
 
 const (
@@ -10,9 +14,18 @@ const (
 type NItems int8
 
 const (
-	Known Sized = iota
+	Known NItems = iota
 	Unknown
 )
+
+// Local WriterAt, ReaderAt as here we cannot support all of io.WriterAt/ReaderAt guarantees
+type WriterAt interface {
+	WriteAt(p []byte, off int64) (n int, err error)
+}
+
+type ReaderAt interface {
+	ReadAt(p []byte, off int64) (n int, err error)
+}
 
 /*
         Write            / Read             NItems**        : Reader       / Writer
@@ -30,11 +43,11 @@ const (
     * - Preferred implementation
    ** - Number of total items to be written, at the time of start of write
 
-   Need: Writer: linear, mmap, kv
-         Reader: linear, mmap, kv
+   Need: Writer: linear, mmap, kv, MC
+         Reader: linear, mmap, kv, MC
 
    Idea: mmap chunker (MC); array of mmaps, each a certain size (10,000 x SizeOf)
-         Get(i int64): which mmap: a[i/10000]; where in this mmap? i%10000
+         Get(i int64): which mmap: a[i/(10000*sizeOf)]; where in this mmap? i%(10000*sizeOf)
          (for unknown array size)
 */
 
@@ -48,23 +61,21 @@ type Deserializer[T any] interface {
 	SizeOf() int
 }
 
-type Writer interface {
-	Write(int64, []byte) error
-}
-
-type Reader interface {
-	Read(int64) ([]byte, error)
-}
-
-func Put[T any](w Writer, s Serializer[T], index int64, value *T) error {
+func Put[T any](w WriterAt, s Serializer[T], index int64, value *T) error {
 	buf, err := s.Serialize(*value)
 	if err != nil {
 		return err
 	}
-	return w.Write(index, buf)
+
+	//
+	n, err := w.WriteAt(buf, index*int64(s.SizeOf()))
+	if n != s.SizeOf() {
+		return fmt.Errorf("Wrong # bytes written: have %d; want %d", n, s.SizeOf())
+	}
+	return err
 }
 
-func Get[T any](w Reader, d Deserializer[T], index int64) (*T, error) {
+func Get[T any](r ReaderAt, d Deserializer[T], index int64) (*T, error) {
 	return nil, nil
 }
 
