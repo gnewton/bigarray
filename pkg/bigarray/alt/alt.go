@@ -23,9 +23,9 @@ const (
        	SequentialAccess / RandomAccess     Known     : mmap|*linear / mmap
 
        	RandomAccess     / SequentialAccess Known     : mmap         / mmap|*linear
-       	RandomAccess     / SequentialAccess Unknown   : kv           / kv
+       	RandomAccess     / SequentialAccess Unknown   : kv|MC           / kv
        	RandomAccess     / RandomAccess     Known     : mmap         / mmap
-       	RandomAccess     / RandomAccess     Unknown   : kv           / kv
+       	RandomAccess     / RandomAccess     Unknown   : kv|MC           / kv|MC
 
     * - Preferred implementation
    ** - Number of total items to be written, at the time of start of write
@@ -33,7 +33,7 @@ const (
    Need: Writer: linear, mmap, kv
          Reader: linear, mmap, kv
 
-   Idea: mmap chunker; array of mmaps, each a certain size (10,000 x SizeOf)
+   Idea: mmap chunker (MC); array of mmaps, each a certain size (10,000 x SizeOf)
          Get(i int64): which mmap: a[i/10000]; where in this mmap? i%10000
          (for unknown array size)
 */
