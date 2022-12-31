@@ -26,6 +26,7 @@ type WriterAt interface {
 
 type ReaderAt interface {
 	ReadAt(p []byte, off int64) (n int, err error)
+	Done() error
 }
 
 /*
