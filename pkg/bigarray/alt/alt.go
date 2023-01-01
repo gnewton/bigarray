@@ -68,9 +68,11 @@ func Put[T any](w WriterAt, s Serializer[T], index int64, value *T) error {
 	if err != nil {
 		return err
 	}
+	if len(buf) != s.SizeOf() {
+		return fmt.Errorf("Serialize byte array wrong length; have: %d; need: %d", len(buf), s.SizeOf())
+	}
 
-	//
-	n, err := w.WriteAt(buf, index*int64(s.SizeOf()))
+	n, err := w.WriteAt(buf, index)
 	if n != s.SizeOf() {
 		return fmt.Errorf("Wrong # bytes written: have %d; want %d", n, s.SizeOf())
 	}
