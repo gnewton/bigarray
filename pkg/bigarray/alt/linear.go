@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -62,17 +61,3 @@ func (w *SequentialWriter) Done() error {
 }
 
 // return fmt.Errorf("Not implemented")
-
-func tmpFile(tmpDir string) (*os.File, error) {
-	if len(tmpDir) == 0 {
-		tmpDir = "."
-	}
-	f, err := os.CreateTemp(".", SeqFilePrefix)
-	if err != nil {
-		return nil, err
-	}
-	defer os.Remove(f.Name())
-
-	log.Println("Opened: ", f.Name())
-	return f, nil
-}

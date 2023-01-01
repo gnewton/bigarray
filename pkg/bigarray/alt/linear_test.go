@@ -1,6 +1,7 @@
 package alt
 
 import (
+	"errors"
 	"log"
 	"os"
 	"testing"
@@ -34,5 +35,12 @@ func Test_Instantiate_BadSizeOf(t *testing.T) {
 	_, err = NewSequentialWriter(f, 0)
 	if err == nil {
 		t.Fatal(err)
+	}
+}
+
+func Test_Instantiate_NilFile(t *testing.T) {
+	_, err := NewSequentialWriter(nil, 8)
+	if err == nil {
+		t.Fatal(errors.New("Should be nil"))
 	}
 }
