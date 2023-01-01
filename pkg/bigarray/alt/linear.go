@@ -7,13 +7,21 @@ import (
 	"os"
 )
 
+type Sequential struct {
+	index  int64
+	file   *os.File
+	sizeof int
+}
+
 type SequentialWriter struct {
-	index    int64
-	file     *os.File
-	filename string
-	writer   *bufio.Writer
-	frozen   bool
-	sizeof   int
+	Sequential
+	writer *bufio.Writer
+	frozen bool
+}
+
+type SequentialReader struct {
+	Sequential
+	reader *bufio.Reader
 }
 
 const SeqFilePrefix = "big_"
@@ -42,7 +50,7 @@ func (w *SequentialWriter) WriteAt(p []byte, index int64) (n int, err error) {
 	if index != w.index {
 		return 0, fmt.Errorf("Offset incorrect: have: %d; need: %d", index, w.index)
 	}
-	index++
+	w.index++
 	return w.writer.Write(p)
 }
 
@@ -60,4 +68,29 @@ func (w *SequentialWriter) Done() error {
 	return nil
 }
 
-// return fmt.Errorf("Not implemented")
+func NewSequentialReader(f *os.File, sizeof int) (*SequentialReader, error) {
+	if f == nil {
+		return nil, errors.New("file is nil")
+	}
+	if sizeof <= 0 {
+		return nil, fmt.Errorf("sizeof cannot be < 1; have: %d", sizeof)
+	}
+
+	r := new(SequentialReader)
+	r.file = f
+	r.sizeof = sizeof
+	r.reader = bufio.NewReader(f)
+
+	return r, nil
+}
+
+func (r *SequentialReader) ReadAt(p []byte, index int64) (n int, err error) {
+	if index != r.index {
+		return 0, fmt.Errorf("Offset incorrect: have: %d; need: %d", index, r.index)
+	}
+	r.index++
+	return r.reader.Read(p)
+}
+func (w *SequentialReader) Done() error {
+	return w.file.Close()
+}

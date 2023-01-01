@@ -2,6 +2,7 @@ package alt
 
 import (
 	"fmt"
+	//	"log"
 )
 
 type Mode int8
@@ -55,10 +56,6 @@ type ReaderAt interface {
 
 type Serializer[T any] interface {
 	Serialize(T) ([]byte, error)
-	SizeOf() int
-}
-
-type Deserializer[T any] interface {
 	Deserialize([]byte) (T, error)
 	SizeOf() int
 }
@@ -68,19 +65,36 @@ func Put[T any](w WriterAt, s Serializer[T], index int64, value *T) error {
 	if err != nil {
 		return err
 	}
+
 	if len(buf) != s.SizeOf() {
 		return fmt.Errorf("Serialize byte array wrong length; have: %d; need: %d", len(buf), s.SizeOf())
 	}
 
 	n, err := w.WriteAt(buf, index)
+	if err != nil {
+		return err
+	}
 	if n != s.SizeOf() {
 		return fmt.Errorf("Wrong # bytes written: have %d; want %d", n, s.SizeOf())
 	}
 	return err
 }
 
-func Get[T any](r ReaderAt, d Deserializer[T], index int64) (*T, error) {
-	return nil, nil
+func Get[T any](r ReaderAt, s Serializer[T], index int64) (*T, error) {
+	sizeOf := s.SizeOf()
+	buf := make([]byte, sizeOf)
+	n, err := r.ReadAt(buf, index)
+	if err != nil {
+		return nil, err
+	}
+	if n != sizeOf {
+		return nil, fmt.Errorf("Wrong number of bytes read: %s", haveNeed(n, sizeOf))
+	}
+
+	v, err := s.Deserialize(buf)
+
+	return &v, err
+
 }
 
 /*

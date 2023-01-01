@@ -19,8 +19,6 @@ func tmpFile(tmpDir string) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(f.Name())
-
 	log.Println("Opened: ", f.Name())
 	return f, nil
 }
@@ -36,4 +34,8 @@ func zero(i int) string {
 
 func haveNeed(h, n int) string {
 	return fmt.Sprintf("Have: %d; need: %d", h, n)
+}
+
+func notImplemented() error {
+	return fmt.Errorf("Not implemented")
 }
