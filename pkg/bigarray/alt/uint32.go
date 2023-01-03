@@ -29,7 +29,7 @@ func uint32ToBytes(i uint32) []byte {
 
 func bytesToUint32(b []byte) (uint32, error) {
 	if len(b) != 4 {
-		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(len(b), 4))
+		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(int64(len(b)), int64(4)))
 	}
 	return binary.LittleEndian.Uint32(b), nil
 }

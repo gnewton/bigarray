@@ -2,6 +2,7 @@ package alt
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	//"log"
 )
@@ -28,8 +29,11 @@ func uint64ToBytes(i uint64) []byte {
 }
 
 func bytesToUint64(b []byte) (uint64, error) {
+	if b == nil {
+		return 0, errors.New("[]byte is nil")
+	}
 	if len(b) != 8 {
-		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(len(b), 8))
+		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(int64(len(b)), 8))
 	}
 	return binary.LittleEndian.Uint64(b), nil
 }

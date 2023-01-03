@@ -88,7 +88,7 @@ func Get[T any](r ReaderAt, s Serializer[T], index int64) (*T, error) {
 		return nil, err
 	}
 	if n != sizeOf {
-		return nil, fmt.Errorf("Wrong number of bytes read: %s", haveNeed(n, sizeOf))
+		return nil, fmt.Errorf("Wrong number of bytes read: %s", haveNeed(int64(n), int64(sizeOf)))
 	}
 
 	v, err := s.Deserialize(buf)

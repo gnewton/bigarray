@@ -32,10 +32,14 @@ func zero(i int) string {
 	return "0" + v
 }
 
-func haveNeed(h, n int) string {
+func haveNeed(h, n int64) string {
 	return fmt.Sprintf("Have: %d; need: %d", h, n)
 }
 
 func notImplemented() error {
+	return fmt.Errorf("Not implemented")
+}
+
+func shouldBeError() error {
 	return fmt.Errorf("Not implemented")
 }
