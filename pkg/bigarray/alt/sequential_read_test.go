@@ -26,7 +26,7 @@ func Test_InstantiateAllOKValues(t *testing.T) {
 	r.Done()
 }
 
-func Test_WriteReadValuesInOrder(t *testing.T) {
+func Test_Write1000Read1000ValuesInOrder(t *testing.T) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// WRITE
@@ -78,7 +78,6 @@ func Test_WriteReadValuesInOrder(t *testing.T) {
 			log.Println(err)
 			t.Fatal(err)
 		}
-		log.Println(index, *v)
 		if err != nil {
 			log.Println(v)
 			t.Fatal(err)
