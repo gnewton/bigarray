@@ -1,7 +1,6 @@
 package alt
 
 import (
-	"errors"
 	"log"
 	"os"
 	"testing"
@@ -76,8 +75,9 @@ func Test_WriteValues_OutOfOrder(t *testing.T) {
 	s = new(Uint64Serializer)
 	var v uint64 = 123
 	err = Put(w, s, 1, &v)
+	// Shouldn't fail
 	if err == nil {
-		t.Fatal(err)
+		t.Fatal(shouldBeError())
 	}
 }
 
@@ -89,13 +89,13 @@ func Test_Instantiate_BadSizeOf(t *testing.T) {
 	}
 	_, err = NewSequentialWriter(f, 0)
 	if err == nil {
-		t.Fatal(err)
+		t.Fatal(shouldBeError())
 	}
 }
 
 func Test_Instantiate_NilFile(t *testing.T) {
 	_, err := NewSequentialWriter(nil, 8)
 	if err == nil {
-		t.Fatal(errors.New("Should be nil"))
+		t.Fatal(shouldBeError())
 	}
 }

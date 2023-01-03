@@ -2,6 +2,7 @@ package alt
 
 import (
 	//"errors"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -45,12 +46,14 @@ func Test_Write1000Read1000ValuesInOrder(t *testing.T) {
 	var s Serializer[uint64]
 	s = new(Uint64Serializer)
 
-	var nitems uint64 = 1000
-	var v uint64
-	for v = 0; v < nitems; v++ {
-		err := Put(w, s, int64(v), &v)
+	var nitems int64 = 1000
+	var index int64
+
+	for index = 0; index < nitems; index++ {
+		v := uint64(index)
+		err := Put(w, s, index, &v)
 		if err != nil {
-			log.Println(v)
+			log.Println(index)
 			t.Fatal(err)
 		}
 	}
@@ -71,7 +74,7 @@ func Test_Write1000Read1000ValuesInOrder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var index uint64
+
 	for index = 0; index < nitems; index++ {
 		v, err := Get(r, s, int64(index))
 		if err != nil {
@@ -81,6 +84,9 @@ func Test_Write1000Read1000ValuesInOrder(t *testing.T) {
 		if err != nil {
 			log.Println(v)
 			t.Fatal(err)
+		}
+		if *v != uint64(index) {
+			t.Fatal(fmt.Errorf("Value incorrect: %s", haveNeed(int64(*v), index)))
 		}
 	}
 
