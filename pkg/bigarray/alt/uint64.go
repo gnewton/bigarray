@@ -6,18 +6,18 @@ import (
 	//"log"
 )
 
-type UintSerializer struct {
+type Uint64Serializer struct {
 }
 
-func (s *UintSerializer) Serialize(i uint64) ([]byte, error) {
+func (s *Uint64Serializer) Serialize(i uint64) ([]byte, error) {
 	return uint64ToBytes(i), nil
 }
 
-func (s *UintSerializer) Deserialize(b []byte) (uint64, error) {
+func (s *Uint64Serializer) Deserialize(b []byte) (uint64, error) {
 	return bytesToUint64(b)
 }
 
-func (s *UintSerializer) SizeOf() int {
+func (s *Uint64Serializer) SizeOf() int {
 	return 8
 }
 

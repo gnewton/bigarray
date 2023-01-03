@@ -43,7 +43,7 @@ func Test_Write1000Read1000ValuesInOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	var s Serializer[uint64]
-	s = new(UintSerializer)
+	s = new(Uint64Serializer)
 
 	var nitems uint64 = 1000
 	var v uint64

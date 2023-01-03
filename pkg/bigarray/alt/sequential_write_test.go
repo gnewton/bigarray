@@ -40,7 +40,7 @@ func Test_WriteValuesInOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	var s Serializer[uint64]
-	s = new(UintSerializer)
+	s = new(Uint64Serializer)
 
 	var v uint64
 	for v = 0; v < 10000; v++ {
@@ -73,7 +73,7 @@ func Test_WriteValues_OutOfOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	var s Serializer[uint64]
-	s = new(UintSerializer)
+	s = new(Uint64Serializer)
 	var v uint64 = 123
 	err = Put(w, s, 1, &v)
 	if err == nil {
