@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const SeqFilePrefix = "big_"
+
 func tmpFile(tmpDir string) (*os.File, error) {
 	if len(tmpDir) == 0 {
 		tmpDir = "."
@@ -32,14 +34,14 @@ func zero(i int) string {
 	return "0" + v
 }
 
-func haveNeed(h, n int64) string {
+func HaveNeed(h, n int64) string {
 	return fmt.Sprintf("Have: %d; need: %d", h, n)
 }
 
-func notImplemented() error {
+func NotImplemented() error {
 	return fmt.Errorf("Not implemented")
 }
 
-func shouldBeError() error {
-	return fmt.Errorf("Not implemented")
+func ShouldBeError() error {
+	return fmt.Errorf("Should be an error")
 }

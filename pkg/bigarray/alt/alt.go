@@ -5,18 +5,24 @@ import (
 	//	"log"
 )
 
-type Mode int8
+type ReadAccess int8
+type WriteAccess int8
 
 const (
-	RandomAccess Mode = iota
-	SeqentialAccess
+	RandomReadAccess ReadAccess = iota
+	SeqentialReadAccess
 )
 
-type NItems int8
+const (
+	RandomWriteAccess WriteAccess = iota
+	SeqentialWriteAccess
+)
+
+type Cardinality int8
 
 const (
-	Known NItems = iota
-	Unknown
+	Unknown Cardinality = iota
+	Known
 )
 
 // Local WriterAt, ReaderAt as here we cannot support all of io.WriterAt/ReaderAt guarantees
@@ -88,7 +94,7 @@ func Get[T any](r ReaderAt, s Serializer[T], index int64) (*T, error) {
 		return nil, err
 	}
 	if n != sizeOf {
-		return nil, fmt.Errorf("Wrong number of bytes read: %s", haveNeed(int64(n), int64(sizeOf)))
+		return nil, fmt.Errorf("Wrong number of bytes read: %s", HaveNeed(int64(n), int64(sizeOf)))
 	}
 
 	v, err := s.Deserialize(buf)

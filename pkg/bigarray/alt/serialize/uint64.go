@@ -1,10 +1,10 @@
-package alt
+package serialize
 
 import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	//"log"
+	"github.com/gnewton/bigarray/pkg/bigarray/alt"
 )
 
 type Uint64Serializer struct {
@@ -33,7 +33,7 @@ func bytesToUint64(b []byte) (uint64, error) {
 		return 0, errors.New("[]byte is nil")
 	}
 	if len(b) != 8 {
-		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(int64(len(b)), 8))
+		return 0, fmt.Errorf("[]byte wrong length: %s", alt.HaveNeed(int64(len(b)), 8))
 	}
 	return binary.LittleEndian.Uint64(b), nil
 }

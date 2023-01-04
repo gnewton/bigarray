@@ -1,4 +1,4 @@
-package alt
+package drivers
 
 import (
 	"bufio"
@@ -23,8 +23,6 @@ type SequentialReader struct {
 	Sequential
 	reader *bufio.Reader
 }
-
-const SeqFilePrefix = "big_"
 
 func NewSequentialWriter(f *os.File, sizeof int) (*SequentialWriter, error) {
 	if f == nil {

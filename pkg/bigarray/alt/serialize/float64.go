@@ -1,9 +1,10 @@
-package alt
+package serialize
 
 import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/gnewton/bigarray/pkg/bigarray/alt"
 	"math"
 	//"log"
 )
@@ -51,7 +52,7 @@ func bytesToFloat64(b []byte) (float64, error) {
 		return 0, errors.New("[]byte is nil")
 	}
 	if len(b) != 8 {
-		return 0, fmt.Errorf("[]byte wrong length: %s", haveNeed(int64(len(b)), 8))
+		return 0, fmt.Errorf("[]byte wrong length: %s", alt.HaveNeed(int64(len(b)), 8))
 	}
 	bits := binary.LittleEndian.Uint64(b)
 	return math.Float64frombits(bits), nil

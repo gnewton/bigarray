@@ -1,7 +1,8 @@
-package alt
+package serialize
 
 import (
 	"fmt"
+	"github.com/gnewton/bigarray/pkg/bigarray/alt"
 	"testing"
 )
 
@@ -14,18 +15,18 @@ func Test_Float64To_ZeroBytes(t *testing.T) {
 		t.Fatal(err)
 	}
 	if i != 0 {
-		t.Fatal(fmt.Errorf("Should be zero: %s", haveNeed(int64(i), 0)))
+		t.Fatal(fmt.Errorf("Should be zero: %s", alt.HaveNeed(int64(i), 0)))
 	}
 }
 
 func Test_Float64From_ZeroBytes(t *testing.T) {
 	b := float64ToBytes(float64(0))
 	if len(b) != 8 {
-		t.Fatal(fmt.Errorf("[]byte array wrong length: %s", haveNeed(int64(len(b)), 8)))
+		t.Fatal(fmt.Errorf("[]byte array wrong length: %s", alt.HaveNeed(int64(len(b)), 8)))
 	}
 	for i := 0; i < 8; i++ {
 		if b[i] != 0 {
-			t.Fatal(fmt.Errorf("[]byte array value incorrect at %d: %s", i, haveNeed(int64(b[i]), 0)))
+			t.Fatal(fmt.Errorf("[]byte array value incorrect at %d: %s", i, alt.HaveNeed(int64(b[i]), 0)))
 		}
 	}
 }
@@ -40,7 +41,7 @@ func Test_Float64From_FullCycle(t *testing.T) {
 		// toBytes
 		b := float64ToBytes(float64(i) + .5)
 		if len(b) != 8 {
-			t.Fatal(fmt.Errorf("[]byte wrong length: %s", haveNeed(int64(len(b)), 8)))
+			t.Fatal(fmt.Errorf("[]byte wrong length: %s", alt.HaveNeed(int64(len(b)), 8)))
 		}
 
 		// Back again
@@ -49,7 +50,7 @@ func Test_Float64From_FullCycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		if v != float64(i)+.5 {
-			t.Fatal(fmt.Errorf("Conversion wrong %s", haveNeed(int64(v), int64(i))))
+			t.Fatal(fmt.Errorf("Conversion wrong %s", alt.HaveNeed(int64(v), int64(i))))
 		}
 	}
 }
@@ -60,7 +61,7 @@ func Test_Float64_BytesArgBadLength(t *testing.T) {
 
 	_, err := bytesToFloat64(b)
 	if err == nil {
-		t.Fatal(shouldBeError())
+		t.Fatal(alt.ShouldBeError())
 	}
 }
 
@@ -69,6 +70,6 @@ func Test_Float64_BytesArgNil(t *testing.T) {
 
 	_, err := bytesToFloat64(b)
 	if err == nil {
-		t.Fatal(shouldBeError())
+		t.Fatal(alt.ShouldBeError())
 	}
 }
