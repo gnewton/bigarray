@@ -9,7 +9,7 @@ import (
 
 const SeqFilePrefix = "big_"
 
-func tmpFile(tmpDir string) (*os.File, error) {
+func TmpFile(tmpDir string) (*os.File, error) {
 	if len(tmpDir) == 0 {
 		tmpDir = "."
 	}
